@@ -34,16 +34,35 @@
     <h1 class="title is-2 has-text-centered">Order History</h1>
     <div class="box">
       <form id="form--filters">
-        <div class="field">
-          <label class="label" for="filter--productSKU">Includes Items</label>
-          <div class="control">
-            <div class="select is-fullwidth">
-              <select id="filter--productSKU" name="productSKU">
-                <option value="">All</option>
-                <% for (const productSKU of user.productSKUs) { %>
-                  <option value="<%= productSKU %>"><%= productSKU %></option>
-                <% } %>
-              </select>
+        <div class="columns">
+          <div class="column">
+            <div class="field">
+              <label class="label" for="filter--productSKU">Includes Items</label>
+              <div class="control">
+                <div class="select is-fullwidth">
+                  <select id="filter--productSKU" name="productSKU">
+                    <option value="">All Items</option>
+                    <% for (const productSKU of user.productSKUs) { %>
+                      <option value="<%= productSKU %>"><%= productSKU %></option>
+                    <% } %>
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="column">
+            <div class="field">
+              <label class="label" for="filter--orderStatus">Order Status</label>
+              <div class="control">
+                <div class="select is-fullwidth">
+                  <select id="filter--orderStatus" name="orderStatus">
+                    <option value="">All Statuses</option>
+                    <option value="unpaid">Incomplete/Unpaid</option>
+                    <option value="paid" selected>Paid</option>
+                    <option value="refunded">Refunded</option>
+                  </select>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -57,6 +76,10 @@
       </div>
     </div>
   </div>
+  <script>
+    window.exports = window.exports || {};
+  </script>
+  <script src="/lib/bulma-webapp-js/cityssm.min.js"></script>
   <script src="/javascripts/orders.min.js"></script>
 </body>
 </html>

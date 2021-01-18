@@ -6,17 +6,18 @@ import type { RequestHandler } from "express";
 
 interface FormFilters {
   productSKU: string;
+  orderStatus: "" | "unpaid" | "paid" | "refunded";
 };
 
 
-export const handler: RequestHandler = (req, res) => {
+export const handler: RequestHandler = async (req, res) => {
 
   const queryFilters: GetOrderFilters = {};
 
   const formFilters = req.body as FormFilters;
 
   /*
-   * Product SKUs
+   * Product SKUs (enforces permissions)
    */
 
   const allowedProductSKUs = req.session.user.productSKUs;
@@ -33,8 +34,28 @@ export const handler: RequestHandler = (req, res) => {
     });
   }
 
+  /*
+   * Order Status
+   */
 
-  const orders = getOrders(queryFilters);
+  switch (formFilters.orderStatus) {
+
+    case "unpaid":
+      queryFilters.orderIsPaid = 0;
+      queryFilters.orderIsRefunded = 0;
+      break;
+
+    case "paid":
+      queryFilters.orderIsPaid = 1;
+      queryFilters.orderIsRefunded = 0;
+      break;
+
+    case "refunded":
+      queryFilters.orderIsRefunded = 1;
+      break;
+  }
+
+  const orders = await getOrders(queryFilters);
 
   return res.json({
     orders
