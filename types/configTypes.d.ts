@@ -13,6 +13,9 @@ export interface Config {
     };
     mssqlConfig: sqlTypes.config;
     activeDirectoryConfig: Config_ActiveDirectory;
+    products: {
+        [productSKU: string]: Config_Product;
+    };
     userPermissions: {
         [userName: string]: string[];
     };
@@ -28,4 +31,11 @@ export interface Config_ActiveDirectory {
     baseDN: string;
     username: string;
     password: string;
+}
+export interface Config_Product {
+    productName: string;
+    formFieldsToSave: Array<{
+        formFieldName: string;
+        fieldName: string;
+    }>;
 }

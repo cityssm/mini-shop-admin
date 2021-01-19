@@ -10,6 +10,7 @@ configFallbackValues.set("session.cookieName", "mini-shop-admin-user-sid");
 configFallbackValues.set("session.secret", "cityssm/mini-shop-admin");
 configFallbackValues.set("session.maxAgeMillis", 60 * 60 * 1000);
 configFallbackValues.set("session.doKeepAlive", false);
+configFallbackValues.set("products", {});
 configFallbackValues.set("userPermissions", {});
 function getProperty(propertyName) {
     if (configOverrides.hasOwnProperty(propertyName)) {

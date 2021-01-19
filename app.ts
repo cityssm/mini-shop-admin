@@ -125,7 +125,6 @@ app.use(function(req, res, next) {
   res.locals.dateTimeFns = dateTimeFns;
   res.locals.stringFns = stringFns;
   res.locals.user = req.session.user;
-  res.locals.pageTitle = "";
   next();
 });
 

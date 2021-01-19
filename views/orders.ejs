@@ -42,9 +42,16 @@
                 <div class="select is-fullwidth">
                   <select id="filter--productSKU" name="productSKU">
                     <option value="">All Items</option>
-                    <% for (const productSKU of user.productSKUs) { %>
-                      <option value="<%= productSKU %>"><%= productSKU %></option>
-                    <% } %>
+                    <%
+                      for (const productSKU of user.productSKUs) {
+                        const product = configFns.getProperty("products")[productSKU];
+                    %>
+                      <option value="<%= productSKU %>">
+                        <%= (product ? product.productName : productSKU) %>
+                      </option>
+                    <%
+                      }
+                    %>
                   </select>
                 </div>
               </div>
@@ -78,6 +85,7 @@
   </div>
   <script>
     window.exports = window.exports || {};
+    exports.products = <%- JSON.stringify(configFns.getProperty("products")) %>;
   </script>
   <script src="/lib/bulma-webapp-js/cityssm.min.js"></script>
   <script src="/javascripts/orders.min.js"></script>

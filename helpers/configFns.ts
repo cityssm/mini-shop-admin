@@ -28,6 +28,8 @@ configFallbackValues.set("session.secret", "cityssm/mini-shop-admin");
 configFallbackValues.set("session.maxAgeMillis", 60 * 60 * 1000);
 configFallbackValues.set("session.doKeepAlive", false);
 
+configFallbackValues.set("products", {});
+
 configFallbackValues.set("userPermissions", {});
 
 
@@ -43,6 +45,8 @@ export function getProperty(propertyName: "session.secret"): string;
 export function getProperty(propertyName: "activeDirectoryConfig"): configTypes.Config_ActiveDirectory;
 
 export function getProperty(propertyName: "mssqlConfig"): sqlTypes.config;
+
+export function getProperty(propertyName: "products"): { [productSKU: string]: configTypes.Config_Product };
 
 export function getProperty(propertyName: "userPermissions"): { [userName: string]: string[] };
 
