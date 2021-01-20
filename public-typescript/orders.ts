@@ -1,12 +1,27 @@
 import type * as cityssmTypes from "@cityssm/bulma-webapp-js/src/types";
-import type { Order } from "../../mini-shop-db/types";
-// import type { Order } from "@cityssm/mini-shop-db/types";
+import type * as configTypes from "../types/configTypes";
+import type { Order, OrderItem, OrderItemField } from "@cityssm/mini-shop-db/types";
 
 
 declare const cityssm: cityssmTypes.cityssmGlobal;
 
 
+interface OrderItem_Acknowledge {
+  success?: boolean;
+  message?: string;
+  acknowledgedTime?: Date;
+  acknowledgedUser?: string;
+  itemIsAcknowledged?: boolean;
+}
+
+
 (() => {
+
+  const products = exports.products as {
+    [productSKU: string]: configTypes.Config_Product;
+  };
+
+  delete exports.products;
 
   /*
    * Helper Functions
@@ -27,19 +42,149 @@ declare const cityssm: cityssmTypes.cityssmGlobal;
    * Modal
    */
 
+  let refreshResultsAfterClose = false;
+
+  const acknowledgeItemFn = (clickEvent: MouseEvent) => {
+
+    const buttonEle = clickEvent.currentTarget as HTMLButtonElement;
+
+    const statusTdEle = buttonEle.closest("td");
+    const itemTrEle = statusTdEle.closest("tr");
+    const modalEle = itemTrEle.closest(".modal");
+
+    const itemIndex = itemTrEle.getAttribute("data-item-index");
+    const orderID = modalEle.getAttribute("data-order-id");
+
+    const doAcknowledgeFn = () => {
+
+      cityssm.postJSON("/orders/doAcknowledgeItem", {
+        orderID,
+        itemIndex
+      }, (responseJSON: OrderItem_Acknowledge) => {
+
+        if (responseJSON.success) {
+
+          refreshResultsAfterClose = true;
+
+          const newStatusTdEle = buildAcknowledgeCellEle(responseJSON);
+
+          statusTdEle.remove();
+
+          itemTrEle.appendChild(newStatusTdEle);
+        }
+      });
+    };
+
+    cityssm.confirmModal("Acknowledge Item?",
+      "Are you sure you want to mark this item as acknowledged?",
+      "Acknowledge",
+      "success",
+      doAcknowledgeFn);
+  };
+
+  const buildItemFieldSpanEle = (itemField: OrderItemField, product: configTypes.Config_Product): HTMLSpanElement => {
+
+    const field = product.formFieldsToSave.find((ele) => {
+      return ele.formFieldName === itemField.formFieldName;
+    });
+
+    const spanEle = document.createElement("span");
+
+    spanEle.innerHTML =
+      "<strong>" + cityssm.escapeHTML(field ? field.fieldName : itemField.formFieldName) + ":</strong> " +
+      cityssm.escapeHTML(itemField.fieldValue);
+
+    return spanEle;
+  };
+
+  const buildAcknowledgeCellEle = (item: OrderItem_Acknowledge): HTMLTableCellElement => {
+
+    const tdEle = document.createElement("td");
+    tdEle.className = "has-text-centered";
+
+    if (item.itemIsAcknowledged) {
+      tdEle.classList.add("is-success");
+
+      const acknowledgedTime = new Date(item.acknowledgedTime);
+
+      tdEle.innerHTML = "Acknowledged<br />" +
+        cityssm.dateToString(acknowledgedTime) + "<br />" +
+        cityssm.escapeHTML(item.acknowledgedUser);
+
+    } else {
+      tdEle.classList.add("is-warning");
+
+      const buttonEle = document.createElement("button");
+      buttonEle.className = "button is-success";
+      buttonEle.type = "button";
+      buttonEle.innerHTML = "Acknowledge Item";
+      buttonEle.addEventListener("click", acknowledgeItemFn);
+
+      tdEle.appendChild(buttonEle);
+    }
+
+    return tdEle;
+  };
+
+  const buildItemRowEle = (item: OrderItem): HTMLTableRowElement => {
+
+    const product = products[item.productSKU];
+
+    const trEle = document.createElement("tr");
+    trEle.setAttribute("data-item-index", item.itemIndex.toString());
+
+    // Item
+
+    trEle.insertAdjacentHTML("beforeend",
+      "<th scope=\"row\">" +
+      (product ? product.productName : item.productSKU) +
+      "</th>");
+
+    // Details
+
+    const detailsTdEle = document.createElement("td");
+
+    for (const itemField of item.fields) {
+      const spanEle = buildItemFieldSpanEle(itemField, product);
+      detailsTdEle.appendChild(spanEle);
+      detailsTdEle.insertAdjacentHTML("beforeend", "<br />");
+    }
+
+    trEle.appendChild(detailsTdEle);
+
+    // Status
+
+    const statusTdEle = buildAcknowledgeCellEle(item);
+
+    trEle.appendChild(statusTdEle);
+
+    return trEle;
+  };
+
   const openOrderModal = (clickEvent: MouseEvent) => {
 
     const orderIndex = parseInt((clickEvent.currentTarget as HTMLAnchorElement).getAttribute("data-order-index"), 10);
 
     const order = orders[orderIndex];
 
-    const onshownFn = (modalEle: HTMLDivElement, closeModalFn) => {
-
+    const onhiddenFn = () => {
+      if (refreshResultsAfterClose) {
+        getOrders();
+      }
     };
 
     const onshowFn = (modalEle: HTMLDivElement) => {
 
+      refreshResultsAfterClose = false;
+
+      modalEle.setAttribute("data-order-id", order.orderID.toString());
+
       (modalEle.getElementsByClassName("order--orderNumber")[0] as HTMLSpanElement).innerText = order.orderNumber;
+
+      const orderTime = new Date(order.orderTime);
+
+      (modalEle.getElementsByClassName("order--orderTime")[0] as HTMLSpanElement).innerText =
+        cityssm.dateToString(orderTime) + " " + cityssm.dateToTimeString(orderTime);
 
       const statusEle = (modalEle.getElementsByClassName("order--statusMessage")[0] as HTMLDivElement);
 
@@ -65,6 +210,21 @@ declare const cityssm: cityssmTypes.cityssmGlobal;
           "</div>";
       }
 
+      /*
+       * Items
+       */
+
+      const itemsTbodyEle = document.getElementsByClassName("order--items")[0] as HTMLTableSectionElement;
+
+      for (const item of order.items) {
+        const trEle = buildItemRowEle(item);
+        itemsTbodyEle.appendChild(trEle);
+      }
+
+      /*
+       * Shipping Details
+       */
+
       (modalEle.getElementsByClassName("order--shippingName")[0] as HTMLDivElement).innerText = order.shippingName;
 
       (modalEle.getElementsByClassName("order--shippingAddress")[0] as HTMLDivElement).innerHTML =
@@ -87,7 +247,7 @@ declare const cityssm: cityssmTypes.cityssmGlobal;
 
     cityssm.openHtmlModal("order-view", {
       onshow: onshowFn,
-      onshown: onshownFn
+      onhidden: onhiddenFn
     });
   };
 

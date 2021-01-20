@@ -3,4 +3,24 @@
 $family-sans-serif: 'Barlow', system-ui, sans-serif;
 $body-size: 18px;
 
+$modal-content-width: 900px;
+
 @import '@cityssm/bulma-a11y/bulma-a11y';
+
+.modal-card {
+  max-width: 100%;
+}
+
+
+.table.is-focused tbody {
+
+  &:hover tr,
+  &:focus tr {
+    opacity: 0.5;
+  }
+
+  tr:hover ,
+  tr:focus {
+    opacity: 1;
+  }
+}

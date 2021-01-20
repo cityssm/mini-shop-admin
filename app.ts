@@ -9,8 +9,7 @@ import * as logger from "morgan";
 import * as session from "express-session";
 import * as sqlite from "connect-sqlite3";
 
-import * as miniShopDB from "../mini-shop-db/config";
-// import * as miniShopDB from "@cityssm/mini-shop-db/config";
+import * as miniShopDB from "@cityssm/mini-shop-db/config";
 
 import * as configFns from "./helpers/configFns";
 import * as stringFns from "@cityssm/expressjs-server-js/stringFns";

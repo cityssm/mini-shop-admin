@@ -6,12 +6,32 @@
       <button class="delete is-close-modal-button" aria-label="close"></button>
     </header>
     <section class="modal-card-body">
-      <div class="message order--statusMessage"></div>
-
-      <div class="block">
-        <strong>Order Number</strong><br />
-        <span class="order--orderNumber"></span>
+      <div class="columns is-flex-direction-row-reverse">
+        <div class="column">
+          <div class="message order--statusMessage"></div>
+        </div>
+        <div class="column is-two-thirds">
+          <div class="block">
+            <strong>Order Number</strong><br />
+            <span class="order--orderNumber"></span>
+          </div>
+          <div class="block">
+            <strong>Order Time</strong><br />
+            <span class="order--orderTime"></span>
+          </div>
+        </div>
       </div>
+
+      <table class="table is-fullwidth is-striped is-hoverable is-focused">
+        <thead>
+          <tr>
+            <th>Item</th>
+            <th>Details</th>
+            <th class="has-text-centered">Status</th>
+          </tr>
+        </thead>
+        <tbody class="order--items"></tbody>
+      </table>
 
       <h3 class="title is-5">Contact Details</h3>
       <div class="block order--shippingName"></div>
@@ -25,11 +45,9 @@
           <div class="order--shippingPhoneNumberEvening"></div>
         </div>
       </div>
-
-      <h3 class="title is-5">Items</h3>
     </section>
     <footer class="modal-card-foot is-justify-content-end">
-      <button class="button is-close-modal-button">Close</button>
+      <button class="button is-close-modal-button" type="button">Close</button>
     </footer>
   </div>
 </div>

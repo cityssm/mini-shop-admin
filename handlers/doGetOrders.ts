@@ -1,5 +1,4 @@
-// import { getOrders, GetOrderFilters } from "@cityssm/mini-shop-db/getOrders";
-import { getOrders, GetOrderFilters } from "../../mini-shop-db/getOrders";
+import { getOrders, GetOrderFilters } from "@cityssm/mini-shop-db/getOrders";
 
 import type { RequestHandler } from "express";
 
