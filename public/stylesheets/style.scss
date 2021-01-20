@@ -11,15 +11,13 @@ $modal-content-width: 900px;
   max-width: 100%;
 }
 
-
 .table.is-focused tbody {
-
   &:hover tr,
   &:focus tr {
     opacity: 0.5;
   }
 
-  tr:hover ,
+  tr:hover,
   tr:focus {
     opacity: 1;
   }

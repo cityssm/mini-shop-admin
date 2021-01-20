@@ -47,7 +47,7 @@ router.route("/")
             productSKUs
           };
 
-          res.redirect(redirectURL);
+          return res.redirect(redirectURL);
 
         } else {
 
@@ -56,14 +56,12 @@ router.route("/")
             message: "Access Denied"
           });
         }
-
-      } else {
-
-        return res.render("login", {
-          userName,
-          message: "Login Failed"
-        });
       }
+
+      return res.render("login", {
+        userName,
+        message: "Login Failed"
+      });
 
     } catch (_e) {
 
