@@ -4,7 +4,9 @@ const express = require("express");
 const compression = require("compression");
 const path = require("path");
 const cookieParser = require("cookie-parser");
+const csurf = require("csurf");
 const logger = require("morgan");
+const rateLimit = require("express-rate-limit");
 const session = require("express-session");
 const sqlite = require("connect-sqlite3");
 const miniShopDB = require("@cityssm/mini-shop-db/config");
@@ -24,6 +26,12 @@ app.use(express.urlencoded({
     extended: false
 }));
 app.use(cookieParser());
+app.use(csurf({ cookie: true }));
+const limiter = rateLimit({
+    windowMs: 60 * 1000,
+    max: 1000
+});
+app.use(limiter);
 app.use(express.static(path.join(__dirname, "public")));
 app.use("/lib/bulma-webapp-js", express.static(path.join(__dirname, "node_modules", "@cityssm", "bulma-webapp-js", "dist")));
 app.use("/lib/fa5", express.static(path.join(__dirname, "node_modules", "@fortawesome", "fontawesome-free")));
@@ -61,6 +69,7 @@ app.use(function (req, res, next) {
     res.locals.dateTimeFns = dateTimeFns;
     res.locals.stringFns = stringFns;
     res.locals.user = req.session.user;
+    res.locals.csrfToken = req.csrfToken();
     next();
 });
 app.get("/", sessionChecker, (_req, res) => {

@@ -4,7 +4,9 @@ import * as express from "express";
 import * as compression from "compression";
 import * as path from "path";
 import * as cookieParser from "cookie-parser";
+import * as csurf from "csurf";
 import * as logger from "morgan";
+import * as rateLimit from "express-rate-limit";
 
 import * as session from "express-session";
 import * as sqlite from "connect-sqlite3";
@@ -48,6 +50,19 @@ app.use(express.urlencoded({
 }));
 
 app.use(cookieParser());
+app.use(csurf({ cookie: true }));
+
+
+/*
+ * Rate Limiter
+ */
+
+const limiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 1000
+});
+
+app.use(limiter);
 
 
 /*
@@ -124,6 +139,7 @@ app.use(function(req, res, next) {
   res.locals.dateTimeFns = dateTimeFns;
   res.locals.stringFns = stringFns;
   res.locals.user = req.session.user;
+  res.locals.csrfToken = req.csrfToken();
   next();
 });
 

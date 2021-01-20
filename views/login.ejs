@@ -20,6 +20,7 @@
           Mini Shop Admin
         </h1>
         <form method="post" action="/login">
+          <input name="_csrf" type="hidden" value="<%= csrfToken %>" />
           <label class="label" for="login--userName">User Name</label>
           <div class="field has-addons">
             <div class="control">
