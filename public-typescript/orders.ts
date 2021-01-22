@@ -82,6 +82,47 @@ interface OrderItem_Acknowledge {
       doAcknowledgeFn);
   };
 
+
+  const unacknowledgeItemFn = (clickEvent: MouseEvent) => {
+
+    const buttonEle = clickEvent.currentTarget as HTMLButtonElement;
+
+    const statusTdEle = buttonEle.closest("td");
+    const itemTrEle = statusTdEle.closest("tr");
+    const modalEle = itemTrEle.closest(".modal");
+
+    const itemIndex = itemTrEle.getAttribute("data-item-index");
+    const orderID = modalEle.getAttribute("data-order-id");
+
+    const doUnacknowledgeFn = () => {
+
+      cityssm.postJSON("/orders/doUnacknowledgeItem", {
+        orderID,
+        itemIndex
+      }, (responseJSON: {success: boolean}) => {
+
+        if (responseJSON.success) {
+
+          refreshResultsAfterClose = true;
+
+          const newStatusTdEle = buildAcknowledgeCellEle({
+            itemIsAcknowledged: false
+          });
+
+          statusTdEle.remove();
+
+          itemTrEle.appendChild(newStatusTdEle);
+        }
+      });
+    };
+
+    cityssm.confirmModal("Unacknowledge Item?",
+      "Are you sure you want to unacknowledge this item?",
+      "Unacknowledge",
+      "danger",
+      doUnacknowledgeFn);
+  };
+
   const buildItemFieldSpanEle = (itemField: OrderItemField, product: configTypes.Config_Product): HTMLSpanElement => {
 
     const field = product.formFieldsToSave.find((ele) => {
@@ -109,7 +150,15 @@ interface OrderItem_Acknowledge {
 
       tdEle.innerHTML = "Acknowledged<br />" +
         cityssm.dateToString(acknowledgedTime) + "<br />" +
-        cityssm.escapeHTML(item.acknowledgedUser);
+        cityssm.escapeHTML(item.acknowledgedUser) + "<br />";
+
+      const buttonEle = document.createElement("button");
+      buttonEle.className = "button is-small is-danger mt-2";
+      buttonEle.type = "button";
+      buttonEle.innerHTML = "Unacknowledge";
+      buttonEle.addEventListener("click", unacknowledgeItemFn);
+
+      tdEle.appendChild(buttonEle);
 
     } else {
       tdEle.classList.add("is-warning");
@@ -231,11 +280,11 @@ interface OrderItem_Acknowledge {
         cityssm.escapeHTML(order.shippingAddress1) + "<br />" +
         (order.shippingAddress2 ? cityssm.escapeHTML(order.shippingAddress2) + "<br />" : "") +
         cityssm.escapeHTML(order.shippingCity) + ", " + cityssm.escapeHTML(order.shippingProvince) + "<br />" +
-        cityssm.escapeHTML(order.shippingPostalCode) + " &nbsp;" + cityssm.escapeHTML(order.shippingCountry);
+        cityssm.escapeHTML(order.shippingPostalCode) + " &nbsp;" + cityssm.escapeHTML(order.shippingCountry || "");
 
       (modalEle.getElementsByClassName("order--shippingEmailAddress")[0] as HTMLDivElement).innerHTML =
-        "<a href=\"mailto:" + cityssm.escapeHTML(order.shippingEmailAddress) + "\">" +
-        order.shippingEmailAddress +
+        "<a href=\"mailto:" + cityssm.escapeHTML(order.shippingEmailAddress) + "?subject=RE: " + cityssm.escapeHTML(order.orderNumber) + "\">" +
+        cityssm.escapeHTML(order.shippingEmailAddress) +
         "</a>";
 
       (modalEle.getElementsByClassName("order--shippingPhoneNumberDay")[0] as HTMLDivElement).innerText =
@@ -360,4 +409,5 @@ interface OrderItem_Acknowledge {
 
   document.getElementById("filter--productSKU").addEventListener("change", getOrders);
   document.getElementById("filter--orderStatus").addEventListener("change", getOrders);
+  document.getElementById("filter--orderTimeMaxAgeDays").addEventListener("change", getOrders);
 })();

@@ -6,6 +6,7 @@ import type { RequestHandler } from "express";
 interface FormFilters {
   productSKU: string;
   orderStatus: "" | "unpaid" | "paid" | "refunded";
+  orderTimeMaxAgeDays: "" | "10" | "30" | "60" | "90";
 };
 
 
@@ -52,6 +53,14 @@ export const handler: RequestHandler = async (req, res) => {
     case "refunded":
       queryFilters.orderIsRefunded = 1;
       break;
+  }
+
+  /*
+   * Order Time - Max Age Days
+   */
+
+  if (formFilters.orderTimeMaxAgeDays !== "") {
+    queryFilters.orderTimeMaxAgeDays = parseInt(formFilters.orderTimeMaxAgeDays, 10);
   }
 
   const orders = await getOrders(queryFilters);

@@ -40,6 +40,9 @@ const handler = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
             queryFilters.orderIsRefunded = 1;
             break;
     }
+    if (formFilters.orderTimeMaxAgeDays !== "") {
+        queryFilters.orderTimeMaxAgeDays = parseInt(formFilters.orderTimeMaxAgeDays, 10);
+    }
     const orders = yield getOrders_1.getOrders(queryFilters);
     return res.json({
         orders

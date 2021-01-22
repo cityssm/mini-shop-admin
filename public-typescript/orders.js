@@ -35,6 +35,30 @@ Object.defineProperty(exports, "__esModule", { value: true });
         };
         cityssm.confirmModal("Acknowledge Item?", "Are you sure you want to mark this item as acknowledged?", "Acknowledge", "success", doAcknowledgeFn);
     };
+    var unacknowledgeItemFn = function (clickEvent) {
+        var buttonEle = clickEvent.currentTarget;
+        var statusTdEle = buttonEle.closest("td");
+        var itemTrEle = statusTdEle.closest("tr");
+        var modalEle = itemTrEle.closest(".modal");
+        var itemIndex = itemTrEle.getAttribute("data-item-index");
+        var orderID = modalEle.getAttribute("data-order-id");
+        var doUnacknowledgeFn = function () {
+            cityssm.postJSON("/orders/doUnacknowledgeItem", {
+                orderID: orderID,
+                itemIndex: itemIndex
+            }, function (responseJSON) {
+                if (responseJSON.success) {
+                    refreshResultsAfterClose = true;
+                    var newStatusTdEle = buildAcknowledgeCellEle({
+                        itemIsAcknowledged: false
+                    });
+                    statusTdEle.remove();
+                    itemTrEle.appendChild(newStatusTdEle);
+                }
+            });
+        };
+        cityssm.confirmModal("Unacknowledge Item?", "Are you sure you want to unacknowledge this item?", "Unacknowledge", "danger", doUnacknowledgeFn);
+    };
     var buildItemFieldSpanEle = function (itemField, product) {
         var field = product.formFieldsToSave.find(function (ele) {
             return ele.formFieldName === itemField.formFieldName;
@@ -53,7 +77,13 @@ Object.defineProperty(exports, "__esModule", { value: true });
             var acknowledgedTime = new Date(item.acknowledgedTime);
             tdEle.innerHTML = "Acknowledged<br />" +
                 cityssm.dateToString(acknowledgedTime) + "<br />" +
-                cityssm.escapeHTML(item.acknowledgedUser);
+                cityssm.escapeHTML(item.acknowledgedUser) + "<br />";
+            var buttonEle = document.createElement("button");
+            buttonEle.className = "button is-small is-danger mt-2";
+            buttonEle.type = "button";
+            buttonEle.innerHTML = "Unacknowledge";
+            buttonEle.addEventListener("click", unacknowledgeItemFn);
+            tdEle.appendChild(buttonEle);
         }
         else {
             tdEle.classList.add("is-warning");
@@ -130,10 +160,10 @@ Object.defineProperty(exports, "__esModule", { value: true });
                 cityssm.escapeHTML(order.shippingAddress1) + "<br />" +
                     (order.shippingAddress2 ? cityssm.escapeHTML(order.shippingAddress2) + "<br />" : "") +
                     cityssm.escapeHTML(order.shippingCity) + ", " + cityssm.escapeHTML(order.shippingProvince) + "<br />" +
-                    cityssm.escapeHTML(order.shippingPostalCode) + " &nbsp;" + cityssm.escapeHTML(order.shippingCountry);
+                    cityssm.escapeHTML(order.shippingPostalCode) + " &nbsp;" + cityssm.escapeHTML(order.shippingCountry || "");
             modalEle.getElementsByClassName("order--shippingEmailAddress")[0].innerHTML =
-                "<a href=\"mailto:" + cityssm.escapeHTML(order.shippingEmailAddress) + "\">" +
-                    order.shippingEmailAddress +
+                "<a href=\"mailto:" + cityssm.escapeHTML(order.shippingEmailAddress) + "?subject=RE: " + cityssm.escapeHTML(order.orderNumber) + "\">" +
+                    cityssm.escapeHTML(order.shippingEmailAddress) +
                     "</a>";
             modalEle.getElementsByClassName("order--shippingPhoneNumberDay")[0].innerText =
                 order.shippingPhoneNumberDay;
@@ -223,4 +253,5 @@ Object.defineProperty(exports, "__esModule", { value: true });
     getOrders();
     document.getElementById("filter--productSKU").addEventListener("change", getOrders);
     document.getElementById("filter--orderStatus").addEventListener("change", getOrders);
+    document.getElementById("filter--orderTimeMaxAgeDays").addEventListener("change", getOrders);
 })();
