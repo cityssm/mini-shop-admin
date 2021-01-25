@@ -82,7 +82,6 @@ interface OrderItem_Acknowledge {
       doAcknowledgeFn);
   };
 
-
   const unacknowledgeItemFn = (clickEvent: MouseEvent) => {
 
     const buttonEle = clickEvent.currentTarget as HTMLButtonElement;
@@ -99,7 +98,7 @@ interface OrderItem_Acknowledge {
       cityssm.postJSON("/orders/doUnacknowledgeItem", {
         orderID,
         itemIndex
-      }, (responseJSON: {success: boolean}) => {
+      }, (responseJSON: { success: boolean }) => {
 
         if (responseJSON.success) {
 
@@ -123,19 +122,20 @@ interface OrderItem_Acknowledge {
       doUnacknowledgeFn);
   };
 
-  const buildItemFieldSpanEle = (itemField: OrderItemField, product: configTypes.Config_Product): HTMLSpanElement => {
+  const buildItemFieldBlockEle = (itemField: OrderItemField, product: configTypes.Config_Product): HTMLDivElement => {
 
     const field = product.formFieldsToSave.find((ele) => {
       return ele.formFieldName === itemField.formFieldName;
     });
 
-    const spanEle = document.createElement("span");
+    const fieldEle = document.createElement("div");
+    fieldEle.className = "block";
 
-    spanEle.innerHTML =
-      "<strong>" + cityssm.escapeHTML(field ? field.fieldName : itemField.formFieldName) + ":</strong> " +
+    fieldEle.innerHTML =
+      "<strong>" + cityssm.escapeHTML(field ? field.fieldName : itemField.formFieldName) + ":</strong><br />" +
       cityssm.escapeHTML(itemField.fieldValue);
 
-    return spanEle;
+    return fieldEle;
   };
 
   const buildAcknowledgeCellEle = (item: OrderItem_Acknowledge): HTMLTableCellElement => {
@@ -194,9 +194,8 @@ interface OrderItem_Acknowledge {
     const detailsTdEle = document.createElement("td");
 
     for (const itemField of item.fields) {
-      const spanEle = buildItemFieldSpanEle(itemField, product);
-      detailsTdEle.appendChild(spanEle);
-      detailsTdEle.insertAdjacentHTML("beforeend", "<br />");
+      const fieldEle = buildItemFieldBlockEle(itemField, product);
+      detailsTdEle.appendChild(fieldEle);
     }
 
     trEle.appendChild(detailsTdEle);
@@ -308,6 +307,37 @@ interface OrderItem_Acknowledge {
 
   const resultContainerEle = document.getElementById("container--results");
 
+  const buildItemPreviewBlockEle = (order: Order): HTMLDivElement => {
+
+    const blockEle = document.createElement("div");
+
+    const firstItem = order.items[0];
+    const product = products[firstItem.productSKU];
+
+    blockEle.innerHTML =
+      cityssm.escapeHTML(product
+        ? product.productName
+        : firstItem.productSKU) +
+      (order.items.length > 1
+        ? " and " + (order.items.length - 1).toString() + " other" + (order.items.length > 2 ? "s" : "")
+        : "") +
+      "<br />";
+
+    if (firstItem.fields.length > 0) {
+
+      const itemDetailsEle = document.createElement("span");
+      itemDetailsEle.className = "is-size-7";
+
+      itemDetailsEle.innerText = firstItem.fields.reduce((soFar, field) => {
+        return soFar + ", " + field.fieldValue;
+      }, "").substring(2);
+
+      blockEle.appendChild(itemDetailsEle);
+    }
+
+    return blockEle;
+  };
+
   const buildOrderBlockEle = (order: Order, orderIndex: number): HTMLAnchorElement => {
 
     const blockEle = document.createElement("a");
@@ -347,10 +377,13 @@ interface OrderItem_Acknowledge {
         cityssm.dateToString(orderTime) + " " +
         cityssm.dateToTimeString(orderTime) + " " +
         "</div>") +
+      ("<div class=\"column result--itemPreview\"></div>") +
       ("<div class=\"column is-full-mobile is-narrow has-text-right\">" +
         orderTagHTML +
         "</div>") +
       "</div>";
+
+    blockEle.getElementsByClassName("result--itemPreview")[0].appendChild(buildItemPreviewBlockEle(order));
 
     return blockEle;
   };

@@ -59,15 +59,16 @@ Object.defineProperty(exports, "__esModule", { value: true });
         };
         cityssm.confirmModal("Unacknowledge Item?", "Are you sure you want to unacknowledge this item?", "Unacknowledge", "danger", doUnacknowledgeFn);
     };
-    var buildItemFieldSpanEle = function (itemField, product) {
+    var buildItemFieldBlockEle = function (itemField, product) {
         var field = product.formFieldsToSave.find(function (ele) {
             return ele.formFieldName === itemField.formFieldName;
         });
-        var spanEle = document.createElement("span");
-        spanEle.innerHTML =
-            "<strong>" + cityssm.escapeHTML(field ? field.fieldName : itemField.formFieldName) + ":</strong> " +
+        var fieldEle = document.createElement("div");
+        fieldEle.className = "block";
+        fieldEle.innerHTML =
+            "<strong>" + cityssm.escapeHTML(field ? field.fieldName : itemField.formFieldName) + ":</strong><br />" +
                 cityssm.escapeHTML(itemField.fieldValue);
-        return spanEle;
+        return fieldEle;
     };
     var buildAcknowledgeCellEle = function (item) {
         var tdEle = document.createElement("td");
@@ -106,9 +107,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
         var detailsTdEle = document.createElement("td");
         for (var _i = 0, _a = item.fields; _i < _a.length; _i++) {
             var itemField = _a[_i];
-            var spanEle = buildItemFieldSpanEle(itemField, product);
-            detailsTdEle.appendChild(spanEle);
-            detailsTdEle.insertAdjacentHTML("beforeend", "<br />");
+            var fieldEle = buildItemFieldBlockEle(itemField, product);
+            detailsTdEle.appendChild(fieldEle);
         }
         trEle.appendChild(detailsTdEle);
         var statusTdEle = buildAcknowledgeCellEle(item);
@@ -177,6 +177,28 @@ Object.defineProperty(exports, "__esModule", { value: true });
     };
     var orders = null;
     var resultContainerEle = document.getElementById("container--results");
+    var buildItemPreviewBlockEle = function (order) {
+        var blockEle = document.createElement("div");
+        var firstItem = order.items[0];
+        var product = products[firstItem.productSKU];
+        blockEle.innerHTML =
+            cityssm.escapeHTML(product
+                ? product.productName
+                : firstItem.productSKU) +
+                (order.items.length > 1
+                    ? " and " + (order.items.length - 1).toString() + " other" + (order.items.length > 2 ? "s" : "")
+                    : "") +
+                "<br />";
+        if (firstItem.fields.length > 0) {
+            var itemDetailsEle = document.createElement("span");
+            itemDetailsEle.className = "is-size-7";
+            itemDetailsEle.innerText = firstItem.fields.reduce(function (soFar, field) {
+                return soFar + ", " + field.fieldValue;
+            }, "").substring(2);
+            blockEle.appendChild(itemDetailsEle);
+        }
+        return blockEle;
+    };
     var buildOrderBlockEle = function (order, orderIndex) {
         var blockEle = document.createElement("a");
         blockEle.className = "panel-block is-block";
@@ -213,10 +235,12 @@ Object.defineProperty(exports, "__esModule", { value: true });
                 cityssm.dateToString(orderTime) + " " +
                 cityssm.dateToTimeString(orderTime) + " " +
                 "</div>") +
+            ("<div class=\"column result--itemPreview\"></div>") +
             ("<div class=\"column is-full-mobile is-narrow has-text-right\">" +
                 orderTagHTML +
                 "</div>") +
             "</div>";
+        blockEle.getElementsByClassName("result--itemPreview")[0].appendChild(buildItemPreviewBlockEle(order));
         return blockEle;
     };
     var renderGetOrdersResult = function () {
