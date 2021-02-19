@@ -20,7 +20,7 @@
   "homepage": "https://github.com/cityssm/mini-shop-admin#readme",
   "dependencies": {
     "@cityssm/bulma-webapp-js": "^1.0.0",
-    "@cityssm/expressjs-server-js": "^1.0.3",
+    "@cityssm/expressjs-server-js": "^1.0.4",
     "@cityssm/mini-shop-db": "^1.3.1",
     "@fortawesome/fontawesome-free": "^5.15.2",
     "activedirectory2": "^2.1.0",
