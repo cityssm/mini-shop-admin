@@ -1,6 +1,6 @@
 import type * as cityssmTypes from "@cityssm/bulma-webapp-js/src/types";
 import type * as configTypes from "../types/configTypes";
-import type { Order, OrderItem, OrderItemField } from "@cityssm/mini-shop-db/types";
+import type { Order, OrderItemField, OrderItem } from "@cityssm/mini-shop-db/types";
 
 
 declare const cityssm: cityssmTypes.cityssmGlobal;

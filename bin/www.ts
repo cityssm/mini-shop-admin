@@ -6,9 +6,10 @@ import * as http from "http";
 import * as https from "https";
 import * as fs from "fs";
 
-import * as log from "fancy-log";
-
 import * as configFns from "../helpers/configFns";
+
+import { debug } from "debug";
+const debugWWW = debug("mini-shop-admin:www");
 
 
 function onError(error: Error) {
@@ -42,7 +43,7 @@ function onListening(server: http.Server | https.Server) {
     ? "pipe " + addr
     : "port " + addr.port.toString();
 
-  log.info("Listening on " + bind);
+  debugWWW("Listening on " + bind);
 
 }
 
@@ -63,7 +64,7 @@ if (httpPort) {
     onListening(httpServer);
   });
 
-  log.info("HTTP listening on " + httpPort.toString());
+  debugWWW("HTTP listening on " + httpPort.toString());
 }
 
 /**
@@ -88,6 +89,5 @@ if (httpsConfig) {
     onListening(httpsServer);
   });
 
-  log.info("HTTPS listening on " + httpsConfig.port.toString());
-
+  debugWWW("HTTPS listening on " + httpsConfig.port.toString());
 }

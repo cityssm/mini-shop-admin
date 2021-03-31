@@ -72,5 +72,4 @@ export function getProperty(propertyName: string): any {
   }
 
   return currentObj;
-
 }

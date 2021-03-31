@@ -1,13 +1,4 @@
 "use strict";
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 const express_1 = require("express");
 const authFns = require("../helpers/authFns");
 const configFns = require("../helpers/configFns");
@@ -26,11 +17,11 @@ router.route("/")
         });
     }
 })
-    .post((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    .post(async (req, res) => {
     const userName = req.body.userName;
     const passwordPlain = req.body.password;
     try {
-        const isAuthenticated = yield authFns.authenticate(userName, passwordPlain);
+        const isAuthenticated = await authFns.authenticate(userName, passwordPlain);
         if (isAuthenticated) {
             const productSKUs = configFns.getProperty("userPermissions")[userName];
             if (productSKUs) {
@@ -58,5 +49,5 @@ router.route("/")
             message: "Login Failed"
         });
     }
-}));
+});
 module.exports = router;

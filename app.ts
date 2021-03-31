@@ -5,7 +5,6 @@ import * as compression from "compression";
 import * as path from "path";
 import * as cookieParser from "cookie-parser";
 import * as csurf from "csurf";
-import * as logger from "morgan";
 import * as rateLimit from "express-rate-limit";
 
 import * as session from "express-session";
@@ -19,6 +18,9 @@ import * as dateTimeFns from "@cityssm/expressjs-server-js/dateTimeFns";
 
 import * as routerLogin from "./routes/login";
 import * as routerOrders from "./routes/orders";
+
+import { debug } from "debug";
+const debugApp = debug("mini-shop-admin:app");
 
 
 /*
@@ -42,7 +44,11 @@ app.set("view engine", "ejs");
 
 app.use(compression());
 
-app.use(logger("dev"));
+app.use((req, _res, next) => {
+  debugApp(req.method + " " + req.url);
+  next();
+});
+
 app.use(express.json());
 
 app.use(express.urlencoded({
