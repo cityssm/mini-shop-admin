@@ -37,7 +37,7 @@
     "mssql": "^6.3.1"
   },
   "devDependencies": {
-    "@cityssm/bulma-a11y": "^0.2.1",
+    "@cityssm/bulma-a11y": "^0.2.2",
     "@types/activedirectory2": "^1.2.2",
     "@types/compression": "^1.7.0",
     "@types/cookie-parser": "^1.4.2",
