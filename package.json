@@ -19,7 +19,7 @@
   },
   "homepage": "https://github.com/cityssm/mini-shop-admin#readme",
   "dependencies": {
-    "@cityssm/bulma-webapp-js": "^1.0.0",
+    "@cityssm/bulma-webapp-js": "^1.1.2",
     "@cityssm/expressjs-server-js": "^1.0.4",
     "@cityssm/mini-shop-db": "^1.4.1",
     "@fortawesome/fontawesome-free": "^5.15.3",
