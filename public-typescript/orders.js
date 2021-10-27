@@ -102,7 +102,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
         var trEle = document.createElement("tr");
         trEle.setAttribute("data-item-index", item.itemIndex.toString());
         trEle.insertAdjacentHTML("beforeend", "<th scope=\"row\">" +
-            (product ? product.productName : item.productSKU) +
+            (product ? product.productName : item.productSKU) + "<br />" +
+            "$" + (item.quantity * item.unitPrice).toFixed(2) +
             "</th>");
         var detailsTdEle = document.createElement("td");
         for (var _i = 0, _a = item.fields; _i < _a.length; _i++) {

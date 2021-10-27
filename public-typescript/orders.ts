@@ -186,7 +186,8 @@ interface OrderItem_Acknowledge {
 
     trEle.insertAdjacentHTML("beforeend",
       "<th scope=\"row\">" +
-      (product ? product.productName : item.productSKU) +
+      (product ? product.productName : item.productSKU) + "<br />" +
+      "$" + (item.quantity * item.unitPrice).toFixed(2) +
       "</th>");
 
     // Details
