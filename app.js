@@ -86,7 +86,7 @@ app.use("/login", routerLogin);
 app.get("/logout", (request, response) => {
     if (request.session.user && request.cookies[sessionCookieName]) {
         request.session.destroy(null);
-        request.session = null;
+        request.session = undefined;
         response.clearCookie(sessionCookieName);
     }
     response.redirect("/login");

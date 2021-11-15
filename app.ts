@@ -166,10 +166,10 @@ app.get("/logout", (request, response) => {
 
   if (request.session.user && request.cookies[sessionCookieName]) {
 
+    // eslint-disable-next-line unicorn/no-null
     request.session.destroy(null);
-    request.session = null;
+    request.session = undefined;
     response.clearCookie(sessionCookieName);
-
   }
 
   response.redirect("/login");
