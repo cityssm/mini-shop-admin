@@ -1,8 +1,4 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.getProperty = void 0;
-const config = require("../data/config");
-Object.freeze(config);
+import config from "../data/config.js";
 const configOverrides = {};
 const configFallbackValues = new Map();
 configFallbackValues.set("application.httpPort", 54099);
@@ -12,18 +8,17 @@ configFallbackValues.set("session.maxAgeMillis", 60 * 60 * 1000);
 configFallbackValues.set("session.doKeepAlive", false);
 configFallbackValues.set("products", {});
 configFallbackValues.set("userPermissions", {});
-function getProperty(propertyName) {
-    if (configOverrides.hasOwnProperty(propertyName)) {
+export function getProperty(propertyName) {
+    if (Object.prototype.hasOwnProperty.call(configOverrides, propertyName)) {
         return configOverrides[propertyName];
     }
     const propertyNameSplit = propertyName.split(".");
-    let currentObj = config;
-    for (let index = 0; index < propertyNameSplit.length; index += 1) {
-        currentObj = currentObj[propertyNameSplit[index]];
-        if (!currentObj) {
+    let currentObject = config;
+    for (const element of propertyNameSplit) {
+        currentObject = currentObject[element];
+        if (!currentObject) {
             return configFallbackValues.get(propertyName);
         }
     }
-    return currentObj;
+    return currentObject;
 }
-exports.getProperty = getProperty;

@@ -1,53 +1,52 @@
-"use strict";
-const express_1 = require("express");
-const authFns = require("../helpers/authFns");
-const configFns = require("../helpers/configFns");
+import { Router } from "express";
+import * as authFunctions from "../helpers/authenticationFunctions.js";
+import * as configFunctions from "../helpers/configFunctions.js";
 const redirectURL = "/orders";
-const router = express_1.Router();
+export const router = Router();
 router.route("/")
-    .get((req, res) => {
-    const sessionCookieName = configFns.getProperty("session.cookieName");
-    if (req.session.user && req.cookies[sessionCookieName]) {
-        res.redirect(redirectURL);
+    .get((request, response) => {
+    const sessionCookieName = configFunctions.getProperty("session.cookieName");
+    if (request.session.user && request.cookies[sessionCookieName]) {
+        response.redirect(redirectURL);
     }
     else {
-        res.render("login", {
+        response.render("login", {
             userName: "",
             message: ""
         });
     }
 })
-    .post(async (req, res) => {
-    const userName = req.body.userName;
-    const passwordPlain = req.body.password;
+    .post(async (request, response) => {
+    const userName = request.body.userName;
+    const passwordPlain = request.body.password;
     try {
-        const isAuthenticated = await authFns.authenticate(userName, passwordPlain);
+        const isAuthenticated = await authFunctions.authenticate(userName, passwordPlain);
         if (isAuthenticated) {
-            const productSKUs = configFns.getProperty("userPermissions")[userName];
+            const productSKUs = configFunctions.getProperty("userPermissions")[userName];
             if (productSKUs) {
-                req.session.user = {
+                request.session.user = {
                     userName,
                     productSKUs
                 };
-                return res.redirect(redirectURL);
+                return response.redirect(redirectURL);
             }
             else {
-                return res.render("login", {
+                return response.render("login", {
                     userName,
                     message: "Access Denied"
                 });
             }
         }
-        return res.render("login", {
+        return response.render("login", {
             userName,
             message: "Login Failed"
         });
     }
-    catch (_e) {
-        return res.render("login", {
+    catch (_a) {
+        return response.render("login", {
             userName,
             message: "Login Failed"
         });
     }
 });
-module.exports = router;
+export default router;

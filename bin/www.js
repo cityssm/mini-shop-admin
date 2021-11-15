@@ -1,14 +1,11 @@
-#!/usr/bin/env node
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-const app = require("../app");
-const http = require("http");
-const https = require("https");
-const fs = require("fs");
-const configFns = require("../helpers/configFns");
-const debug_1 = require("debug");
-const debugWWW = debug_1.debug("mini-shop-admin:www");
-function onError(error) {
+import { app } from "../app.js";
+import * as http from "http";
+import * as https from "https";
+import * as fs from "fs";
+import * as configFunctions from "../helpers/configFunctions.js";
+import Debug from "debug";
+const debugWWW = Debug("mini-shop-admin:www");
+const onError = (error) => {
     if (error.syscall !== "listen") {
         throw error;
     }
@@ -22,15 +19,15 @@ function onError(error) {
         default:
             throw error;
     }
-}
-function onListening(server) {
+};
+const onListening = (server) => {
     const addr = server.address();
     const bind = typeof addr === "string"
         ? "pipe " + addr
         : "port " + addr.port.toString();
     debugWWW("Listening on " + bind);
-}
-const httpPort = configFns.getProperty("application.httpPort");
+};
+const httpPort = configFunctions.getProperty("application.httpPort");
 if (httpPort) {
     const httpServer = http.createServer(app);
     httpServer.listen(httpPort);
@@ -40,7 +37,7 @@ if (httpPort) {
     });
     debugWWW("HTTP listening on " + httpPort.toString());
 }
-const httpsConfig = configFns.getProperty("application.https");
+const httpsConfig = configFunctions.getProperty("application.https");
 if (httpsConfig) {
     const httpsServer = https.createServer({
         key: fs.readFileSync(httpsConfig.keyPath),

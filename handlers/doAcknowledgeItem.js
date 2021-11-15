@@ -1,37 +1,32 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.handler = void 0;
-const getOrderItem_1 = require("@cityssm/mini-shop-db/getOrderItem");
-const acknowledgeOrderItem_1 = require("@cityssm/mini-shop-db/acknowledgeOrderItem");
-;
-const handler = async (req, res) => {
-    const itemIdentifiers = req.body;
-    const orderItem = await getOrderItem_1.getOrderItem(itemIdentifiers.orderID, itemIdentifiers.itemIndex);
+import { getOrderItem, acknowledgeOrderItem } from "@cityssm/mini-shop-db";
+export const handler = async (request, response) => {
+    const itemIdentifiers = request.body;
+    const orderItem = await getOrderItem(itemIdentifiers.orderID, itemIdentifiers.itemIndex);
     if (!orderItem) {
-        return res.json({
+        return response.json({
             success: false,
             message: "Order Item Not Found"
         });
     }
-    const allowedProductSKUs = req.session.user.productSKUs;
+    const allowedProductSKUs = request.session.user.productSKUs;
     if (!allowedProductSKUs.includes(orderItem.productSKU)) {
-        return res.json({
+        return response.json({
             success: false,
             message: "Access Denied"
         });
     }
     const rightNow = new Date();
-    const result = await acknowledgeOrderItem_1.acknowledgeOrderItem(itemIdentifiers.orderID, itemIdentifiers.itemIndex, {
-        acknowledgedUser: req.session.user.userName,
+    const result = await acknowledgeOrderItem(itemIdentifiers.orderID, itemIdentifiers.itemIndex, {
+        acknowledgedUser: request.session.user.userName,
         acknowledgedTime: rightNow
     });
-    return res.json({
+    return response.json({
         success: result,
         orderID: itemIdentifiers.orderID,
         itemIndex: itemIdentifiers.itemIndex,
-        acknowledgedUser: req.session.user.userName,
+        acknowledgedUser: request.session.user.userName,
         acknowledgedTime: rightNow,
         itemIsAcknowledged: result
     });
 };
-exports.handler = handler;
+export default handler;

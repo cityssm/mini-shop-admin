@@ -1,12 +1,8 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.handler = void 0;
-const getOrders_1 = require("@cityssm/mini-shop-db/getOrders");
-;
-const handler = async (req, res) => {
+import { getOrders } from "@cityssm/mini-shop-db";
+export const handler = async (request, response) => {
     const queryFilters = {};
-    const formFilters = req.body;
-    const allowedProductSKUs = req.session.user.productSKUs;
+    const formFilters = request.body;
+    const allowedProductSKUs = request.session.user.productSKUs;
     if (formFilters.productSKU === "") {
         queryFilters.productSKUs = allowedProductSKUs;
     }
@@ -14,7 +10,7 @@ const handler = async (req, res) => {
         queryFilters.productSKUs = [formFilters.productSKU];
     }
     else {
-        return res.json({
+        return response.json({
             orders: []
         });
     }
@@ -32,11 +28,11 @@ const handler = async (req, res) => {
             break;
     }
     if (formFilters.orderTimeMaxAgeDays !== "") {
-        queryFilters.orderTimeMaxAgeDays = parseInt(formFilters.orderTimeMaxAgeDays, 10);
+        queryFilters.orderTimeMaxAgeDays = Number.parseInt(formFilters.orderTimeMaxAgeDays, 10);
     }
-    const orders = await getOrders_1.getOrders(queryFilters);
-    return res.json({
+    const orders = await getOrders(queryFilters);
+    return response.json({
         orders
     });
 };
-exports.handler = handler;
+export default handler;

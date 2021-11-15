@@ -1,5 +1,4 @@
-import { getOrderItem } from "@cityssm/mini-shop-db/getOrderItem";
-import { acknowledgeOrderItem } from "@cityssm/mini-shop-db/acknowledgeOrderItem";
+import { getOrderItem, acknowledgeOrderItem } from "@cityssm/mini-shop-db";
 
 import type { RequestHandler } from "express";
 
@@ -7,17 +6,17 @@ import type { RequestHandler } from "express";
 interface ItemIdentifiers {
   orderID: string;
   itemIndex: string;
-};
+}
 
 
-export const handler: RequestHandler = async (req, res) => {
+export const handler: RequestHandler = async (request, response) => {
 
-  const itemIdentifiers = req.body as ItemIdentifiers;
+  const itemIdentifiers = request.body as ItemIdentifiers;
 
   const orderItem = await getOrderItem(itemIdentifiers.orderID, itemIdentifiers.itemIndex);
 
   if (!orderItem) {
-    return res.json({
+    return response.json({
       success: false,
       message: "Order Item Not Found"
     });
@@ -28,10 +27,10 @@ export const handler: RequestHandler = async (req, res) => {
    */
 
 
-  const allowedProductSKUs = req.session.user.productSKUs;
+  const allowedProductSKUs = request.session.user.productSKUs;
 
   if (!allowedProductSKUs.includes(orderItem.productSKU)) {
-    return res.json({
+    return response.json({
       success: false,
       message: "Access Denied"
     });
@@ -40,16 +39,18 @@ export const handler: RequestHandler = async (req, res) => {
   const rightNow = new Date();
 
   const result = await acknowledgeOrderItem(itemIdentifiers.orderID, itemIdentifiers.itemIndex, {
-    acknowledgedUser: req.session.user.userName,
+    acknowledgedUser: request.session.user.userName,
     acknowledgedTime: rightNow
   });
 
-  return res.json({
+  return response.json({
     success: result,
     orderID: itemIdentifiers.orderID,
     itemIndex: itemIdentifiers.itemIndex,
-    acknowledgedUser: req.session.user.userName,
+    acknowledgedUser: request.session.user.userName,
     acknowledgedTime: rightNow,
     itemIsAcknowledged: result
   });
 };
+
+export default handler;

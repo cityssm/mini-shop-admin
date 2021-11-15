@@ -1,16 +1,16 @@
 import { Router } from "express";
 
 
-import { handler as handler_doGetOrders } from "../handlers/doGetOrders";
-import { handler as handler_doAcknowledgeItem } from "../handlers/doAcknowledgeItem";
-import { handler as handler_doUnacknowledgeItem } from "../handlers/doUnacknowledgeItem";
+import { handler as handler_doGetOrders } from "../handlers/doGetOrders.js";
+import { handler as handler_doAcknowledgeItem } from "../handlers/doAcknowledgeItem.js";
+import { handler as handler_doUnacknowledgeItem } from "../handlers/doUnacknowledgeItem.js";
 
 
-const router = Router();
+export const router = Router();
 
 
-router.get("/", (_req, res) => {
-  res.render("orders");
+router.get("/", (_request, response) => {
+  response.render("orders");
 });
 
 
@@ -21,4 +21,4 @@ router.post("/doAcknowledgeItem", handler_doAcknowledgeItem);
 router.post("/doUnacknowledgeItem", handler_doUnacknowledgeItem);
 
 
-export = router;
+export default router;

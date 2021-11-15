@@ -1,13 +1,15 @@
 {
   "compilerOptions": {
     "target": "ES2017",
-    "module": "CommonJS",
+    "module": "ES2020",
     "moduleResolution": "Node",
     "isolatedModules": false,
     "declaration": true,
     "noImplicitAny": false,
     "removeComments": true,
-    "allowUnreachableCode": false
+    "allowUnreachableCode": false,
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true
   },
   "compileOnSave": true,
   "buildOnSave": true,
@@ -26,5 +28,8 @@
     "insertSpaceAfterOpeningAndBeforeClosingNonemptyParenthesis": false,
     "placeOpenBraceOnNewLineForFunctions": false,
     "placeOpenBraceOnNewLineForControlBlocks": false
-  }
+  },
+  "exclude": [
+    "public-typescript/*"
+  ]
 }

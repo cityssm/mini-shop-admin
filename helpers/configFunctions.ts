@@ -1,15 +1,9 @@
+/* eslint-disable node/no-unpublished-import */
+
+import config from "../data/config.js";
+
 import type * as configTypes from "../types/configTypes";
 import type * as sqlTypes from "mssql";
-
-
-/*
- * LOAD CONFIGURATION
- */
-
-
-import config = require("../data/config");
-
-Object.freeze(config);
 
 
 /*
@@ -17,11 +11,11 @@ Object.freeze(config);
  */
 
 
-const configOverrides: { [propertyName: string]: any } = {};
+const configOverrides: { [propertyName: string]: unknown } = {};
 
-const configFallbackValues = new Map<string, any>();
+const configFallbackValues = new Map<string, unknown>();
 
-configFallbackValues.set("application.httpPort", 54099);
+configFallbackValues.set("application.httpPort", 54_099);
 
 configFallbackValues.set("session.cookieName", "mini-shop-admin-user-sid");
 configFallbackValues.set("session.secret", "cityssm/mini-shop-admin");
@@ -51,25 +45,25 @@ export function getProperty(propertyName: "products"): { [productSKU: string]: c
 export function getProperty(propertyName: "userPermissions"): { [userName: string]: string[] };
 
 
-export function getProperty(propertyName: string): any {
+export function getProperty(propertyName: string): unknown {
 
-  if (configOverrides.hasOwnProperty(propertyName)) {
+  if (Object.prototype.hasOwnProperty.call(configOverrides, propertyName)) {
     return configOverrides[propertyName];
   }
 
   const propertyNameSplit = propertyName.split(".");
 
-  let currentObj = config;
+  let currentObject = config;
 
-  for (let index = 0; index < propertyNameSplit.length; index += 1) {
+  for (const element of propertyNameSplit) {
 
-    currentObj = currentObj[propertyNameSplit[index]];
+    currentObject = currentObject[element];
 
-    if (!currentObj) {
+    if (!currentObject) {
       return configFallbackValues.get(propertyName);
     }
 
   }
 
-  return currentObj;
+  return currentObject;
 }

@@ -1,18 +1,18 @@
-#!/usr/bin/env node
+/* eslint-disable no-process-exit, unicorn/no-process-exit */
 
-import * as app from "../app";
+import { app } from "../app.js";
 
 import * as http from "http";
 import * as https from "https";
 import * as fs from "fs";
 
-import * as configFns from "../helpers/configFns";
+import * as configFunctions from "../helpers/configFunctions.js";
 
-import { debug } from "debug";
-const debugWWW = debug("mini-shop-admin:www");
+import Debug from "debug";
+const debugWWW = Debug("mini-shop-admin:www");
 
 
-function onError(error: Error) {
+const onError = (error: Error) => {
 
   if (error.syscall !== "listen") {
     throw error;
@@ -33,9 +33,9 @@ function onError(error: Error) {
     default:
       throw error;
   }
-}
+};
 
-function onListening(server: http.Server | https.Server) {
+const onListening = (server: http.Server | https.Server) => {
 
   const addr = server.address();
 
@@ -44,14 +44,13 @@ function onListening(server: http.Server | https.Server) {
     : "port " + addr.port.toString();
 
   debugWWW("Listening on " + bind);
-
-}
+};
 
 /**
  * Initialize HTTP
  */
 
-const httpPort = configFns.getProperty("application.httpPort");
+const httpPort = configFunctions.getProperty("application.httpPort");
 
 if (httpPort) {
 
@@ -71,7 +70,7 @@ if (httpPort) {
  * Initialize HTTPS
  */
 
-const httpsConfig = configFns.getProperty("application.https");
+const httpsConfig = configFunctions.getProperty("application.https");
 
 if (httpsConfig) {
 

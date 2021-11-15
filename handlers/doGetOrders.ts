@@ -1,4 +1,6 @@
-import { getOrders, GetOrderFilters } from "@cityssm/mini-shop-db/getOrders";
+import { getOrders } from  "@cityssm/mini-shop-db";
+
+import type { GetOrderFilters } from "@cityssm/mini-shop-db/getOrders";
 
 import type { RequestHandler } from "express";
 
@@ -7,20 +9,20 @@ interface FormFilters {
   productSKU: string;
   orderStatus: "" | "unpaid" | "paid" | "refunded";
   orderTimeMaxAgeDays: "" | "10" | "30" | "60" | "90";
-};
+}
 
 
-export const handler: RequestHandler = async (req, res) => {
+export const handler: RequestHandler = async (request, response) => {
 
   const queryFilters: GetOrderFilters = {};
 
-  const formFilters = req.body as FormFilters;
+  const formFilters = request.body as FormFilters;
 
   /*
    * Product SKUs (enforces permissions)
    */
 
-  const allowedProductSKUs = req.session.user.productSKUs;
+  const allowedProductSKUs = request.session.user.productSKUs;
 
   if (formFilters.productSKU === "") {
     queryFilters.productSKUs = allowedProductSKUs;
@@ -29,7 +31,7 @@ export const handler: RequestHandler = async (req, res) => {
     queryFilters.productSKUs = [formFilters.productSKU];
 
   } else {
-    return res.json({
+    return response.json({
       orders: []
     });
   }
@@ -60,13 +62,14 @@ export const handler: RequestHandler = async (req, res) => {
    */
 
   if (formFilters.orderTimeMaxAgeDays !== "") {
-    queryFilters.orderTimeMaxAgeDays = parseInt(formFilters.orderTimeMaxAgeDays, 10);
+    queryFilters.orderTimeMaxAgeDays = Number.parseInt(formFilters.orderTimeMaxAgeDays, 10);
   }
 
   const orders = await getOrders(queryFilters);
 
-  return res.json({
+  return response.json({
     orders
   });
-
 };
+
+export default handler;
