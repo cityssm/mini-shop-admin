@@ -39,7 +39,7 @@
     "express-rate-limit": "^5.5.1",
     "express-session": "^1.17.2",
     "http-errors": "^1.8.1",
-    "mssql": "^7.2.1"
+    "mssql": "^8.0.0"
   },
   "devDependencies": {
     "@cityssm/bulma-a11y": "^0.3.0",
