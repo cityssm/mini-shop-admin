@@ -275,5 +275,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
     getOrders();
     document.querySelector("#filter--productSKU").addEventListener("change", getOrders);
     document.querySelector("#filter--orderStatus").addEventListener("change", getOrders);
+    document.querySelector("#filter--acknowledgedStatus").addEventListener("change", getOrders);
     document.querySelector("#filter--orderTimeMaxAgeDays").addEventListener("change", getOrders);
 })();

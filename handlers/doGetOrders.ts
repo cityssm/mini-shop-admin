@@ -1,4 +1,4 @@
-import { getOrders } from  "@cityssm/mini-shop-db";
+import { getOrders } from "@cityssm/mini-shop-db";
 
 import type { GetOrderFilters } from "@cityssm/mini-shop-db/getOrders";
 
@@ -8,6 +8,7 @@ import type { RequestHandler } from "express";
 interface FormFilters {
   productSKU: string;
   orderStatus: "" | "unpaid" | "paid" | "refunded";
+  acknowledgedStatus: "" | "acknowledged" | "unacknowledged";
   orderTimeMaxAgeDays: "" | "10" | "30" | "60" | "90";
 }
 
@@ -54,6 +55,21 @@ export const handler: RequestHandler = async (request, response) => {
 
     case "refunded":
       queryFilters.orderIsRefunded = 1;
+      break;
+  }
+
+  /*
+   * Acknowledged Status
+   */
+
+  switch (formFilters.acknowledgedStatus) {
+
+    case "acknowledged":
+      queryFilters.itemIsAcknowledged = 1;
+      break;
+
+    case "unacknowledged":
+      queryFilters.itemIsAcknowledged = 0;
       break;
   }
 

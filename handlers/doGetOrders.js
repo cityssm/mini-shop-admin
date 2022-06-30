@@ -27,6 +27,14 @@ export const handler = async (request, response) => {
             queryFilters.orderIsRefunded = 1;
             break;
     }
+    switch (formFilters.acknowledgedStatus) {
+        case "acknowledged":
+            queryFilters.itemIsAcknowledged = 1;
+            break;
+        case "unacknowledged":
+            queryFilters.itemIsAcknowledged = 0;
+            break;
+    }
     if (formFilters.orderTimeMaxAgeDays !== "") {
         queryFilters.orderTimeMaxAgeDays = Number.parseInt(formFilters.orderTimeMaxAgeDays, 10);
     }
