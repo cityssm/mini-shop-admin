@@ -2,11 +2,13 @@
 
 import type * as cityssmTypes from "@cityssm/bulma-webapp-js/src/types";
 import type * as configTypes from "../types/configTypes";
-import type { Order, OrderItemField, OrderItem } from "@cityssm/mini-shop-db/types";
-
+import type {
+  Order,
+  OrderItemField,
+  OrderItem,
+} from "@cityssm/mini-shop-db/types";
 
 declare const cityssm: cityssmTypes.cityssmGlobal;
-
 
 interface OrderItem_Acknowledge {
   success?: boolean;
@@ -16,9 +18,7 @@ interface OrderItem_Acknowledge {
   itemIsAcknowledged?: boolean;
 }
 
-
 (() => {
-
   const products = exports.products as {
     [productSKU: string]: configTypes.Config_Product;
   };
@@ -30,7 +30,6 @@ interface OrderItem_Acknowledge {
    */
 
   const isOrderFullyAcknowledged = (order: Order): boolean => {
-
     for (const item of order.items) {
       if (!item.itemIsAcknowledged) {
         return false;
@@ -47,85 +46,92 @@ interface OrderItem_Acknowledge {
   let refreshResultsAfterClose = false;
 
   const acknowledgeItemFunction = (clickEvent: MouseEvent) => {
-
     const buttonElement = clickEvent.currentTarget as HTMLButtonElement;
 
     const statusTdElement = buttonElement.closest("td");
-    const itemTrElement = statusTdElement.closest("tr");
-    const modalElement = itemTrElement.closest(".modal");
+    const itemTrElement = statusTdElement?.closest("tr");
+    const modalElement = itemTrElement?.closest(".modal");
 
     const itemIndex = itemTrElement.getAttribute("data-item-index");
     const orderID = modalElement.getAttribute("data-order-id");
 
     const doAcknowledgeFunction = () => {
+      cityssm.postJSON(
+        "/orders/doAcknowledgeItem",
+        {
+          orderID,
+          itemIndex,
+        },
+        (responseJSON: OrderItem_Acknowledge) => {
+          if (responseJSON.success) {
+            refreshResultsAfterClose = true;
 
-      cityssm.postJSON("/orders/doAcknowledgeItem", {
-        orderID,
-        itemIndex
-      }, (responseJSON: OrderItem_Acknowledge) => {
+            const newStatusTdElement =
+              buildAcknowledgeCellElement(responseJSON);
 
-        if (responseJSON.success) {
+            statusTdElement.remove();
 
-          refreshResultsAfterClose = true;
-
-          const newStatusTdElement = buildAcknowledgeCellElement(responseJSON);
-
-          statusTdElement.remove();
-
-          itemTrElement.append(newStatusTdElement);
-        }
-      });
+            itemTrElement.append(newStatusTdElement);
+          }
+        },
+      );
     };
 
-    cityssm.confirmModal("Acknowledge Item?",
+    cityssm.confirmModal(
+      "Acknowledge Item?",
       "Are you sure you want to mark this item as acknowledged?",
       "Acknowledge",
       "success",
-      doAcknowledgeFunction);
+      doAcknowledgeFunction,
+    );
   };
 
   const unacknowledgeItemFunction = (clickEvent: MouseEvent) => {
-
     const buttonElement = clickEvent.currentTarget as HTMLButtonElement;
 
     const statusTdElement = buttonElement.closest("td");
-    const itemTrElement = statusTdElement.closest("tr");
-    const modalElement = itemTrElement.closest(".modal");
+    const itemTrElement = statusTdElement?.closest("tr");
+    const modalElement = itemTrElement?.closest(".modal");
 
     const itemIndex = itemTrElement.getAttribute("data-item-index");
     const orderID = modalElement.getAttribute("data-order-id");
 
     const doUnacknowledgeFunction = () => {
+      cityssm.postJSON(
+        "/orders/doUnacknowledgeItem",
+        {
+          orderID,
+          itemIndex,
+        },
+        (responseJSON: { success: boolean }) => {
+          if (responseJSON.success) {
+            refreshResultsAfterClose = true;
 
-      cityssm.postJSON("/orders/doUnacknowledgeItem", {
-        orderID,
-        itemIndex
-      }, (responseJSON: { success: boolean }) => {
+            const newStatusTdElement = buildAcknowledgeCellElement({
+              itemIsAcknowledged: false,
+            });
 
-        if (responseJSON.success) {
+            statusTdElement.remove();
 
-          refreshResultsAfterClose = true;
-
-          const newStatusTdElement = buildAcknowledgeCellElement({
-            itemIsAcknowledged: false
-          });
-
-          statusTdElement.remove();
-
-          itemTrElement.append(newStatusTdElement);
-        }
-      });
+            itemTrElement.append(newStatusTdElement);
+          }
+        },
+      );
     };
 
-    cityssm.confirmModal("Unacknowledge Item?",
+    cityssm.confirmModal(
+      "Unacknowledge Item?",
       "Are you sure you want to unacknowledge this item?",
       "Unacknowledge",
       "danger",
-      doUnacknowledgeFunction);
+      doUnacknowledgeFunction,
+    );
   };
 
-  const buildItemFieldBlockElement = (itemField: OrderItemField, product: configTypes.Config_Product): HTMLDivElement => {
-
+  const buildItemFieldBlockElement = (
+    itemField: OrderItemField,
+    product: configTypes.Config_Product,
+  ): HTMLDivElement => {
     const field = product.formFieldsToSave.find((element) => {
       return element.formFieldName === itemField.formFieldName;
     });
@@ -134,14 +140,17 @@ interface OrderItem_Acknowledge {
     fieldElement.className = "block";
 
     fieldElement.innerHTML =
-      "<strong>" + cityssm.escapeHTML(field ? field.fieldName : itemField.formFieldName) + ":</strong><br />" +
+      "<strong>" +
+      cityssm.escapeHTML(field ? field.fieldName : itemField.formFieldName) +
+      ":</strong><br />" +
       cityssm.escapeHTML(itemField.fieldValue);
 
     return fieldElement;
   };
 
-  const buildAcknowledgeCellElement = (item: OrderItem_Acknowledge): HTMLTableCellElement => {
-
+  const buildAcknowledgeCellElement = (
+    item: OrderItem_Acknowledge,
+  ): HTMLTableCellElement => {
     const tdElement = document.createElement("td");
     tdElement.className = "has-text-centered";
 
@@ -150,9 +159,12 @@ interface OrderItem_Acknowledge {
 
       const acknowledgedTime = new Date(item.acknowledgedTime);
 
-      tdElement.innerHTML = "Acknowledged<br />" +
-        cityssm.dateToString(acknowledgedTime) + "<br />" +
-        cityssm.escapeHTML(item.acknowledgedUser) + "<br />";
+      tdElement.innerHTML =
+        "Acknowledged<br />" +
+        cityssm.dateToString(acknowledgedTime) +
+        "<br />" +
+        cityssm.escapeHTML(item.acknowledgedUser) +
+        "<br />";
 
       const buttonElement = document.createElement("button");
       buttonElement.className = "button is-small is-danger mt-2";
@@ -161,7 +173,6 @@ interface OrderItem_Acknowledge {
       buttonElement.addEventListener("click", unacknowledgeItemFunction);
 
       tdElement.append(buttonElement);
-
     } else {
       tdElement.classList.add("is-warning");
 
@@ -178,7 +189,6 @@ interface OrderItem_Acknowledge {
   };
 
   const buildItemRowElement = (item: OrderItem): HTMLTableRowElement => {
-
     const product = products[item.productSKU];
 
     const trElement = document.createElement("tr");
@@ -186,11 +196,15 @@ interface OrderItem_Acknowledge {
 
     // Item
 
-    trElement.insertAdjacentHTML("beforeend",
-      "<th scope=\"row\">" +
-      (product ? product.productName : item.productSKU) + "<br />" +
-      "$" + (item.quantity * item.unitPrice).toFixed(2) +
-      "</th>");
+    trElement.insertAdjacentHTML(
+      "beforeend",
+      '<th scope="row">' +
+        (product ? product.productName : item.productSKU) +
+        "<br />" +
+        "$" +
+        (item.quantity * item.unitPrice).toFixed(2) +
+        "</th>",
+    );
 
     // Details
 
@@ -214,49 +228,58 @@ interface OrderItem_Acknowledge {
 
   const onhiddenFunction = () => {
     if (refreshResultsAfterClose) {
-      getOrders();
+      getOrders(false);
     }
   };
 
   const openOrderModal = (clickEvent: MouseEvent) => {
-
-    const orderIndex = Number.parseInt((clickEvent.currentTarget as HTMLAnchorElement).getAttribute("data-order-index"), 10);
+    const orderIndex = Number.parseInt(
+      (clickEvent.currentTarget as HTMLAnchorElement).getAttribute(
+        "data-order-index",
+      ),
+      10,
+    );
 
     const order = orders[orderIndex];
 
     const onshowFunction = (modalElement: HTMLDivElement) => {
-
       refreshResultsAfterClose = false;
 
       modalElement.dataset.orderId = order.orderID.toString();
 
-      (modalElement.querySelector(".order--orderNumber") as HTMLSpanElement).textContent = order.orderNumber;
+      (
+        modalElement.querySelector(".order--orderNumber") as HTMLSpanElement
+      ).textContent = order.orderNumber;
 
       const orderTime = new Date(order.orderTime);
 
-      (modalElement.querySelector(".order--orderTime") as HTMLSpanElement).textContent =
-        cityssm.dateToString(orderTime) + " " + cityssm.dateToTimeString(orderTime);
+      (
+        modalElement.querySelector(".order--orderTime") as HTMLSpanElement
+      ).textContent =
+        cityssm.dateToString(orderTime) +
+        " " +
+        cityssm.dateToTimeString(orderTime);
 
-      const statusElement = (modalElement.querySelector(".order--statusMessage") as HTMLDivElement);
+      const statusElement = modalElement.querySelector(
+        ".order--statusMessage",
+      ) as HTMLDivElement;
 
       if (order.orderIsRefunded) {
-
         statusElement.classList.add("is-warning");
-        statusElement.innerHTML = "<div class=\"message-body\">" +
+        statusElement.innerHTML =
+          '<div class="message-body">' +
           "<strong>This order has been marked as refunded.</strong>" +
           "</div>";
-
       } else if (order.orderIsPaid) {
-
         statusElement.classList.add("is-success");
-        statusElement.innerHTML = "<div class=\"message-body\">" +
-          "<p class=\"has-text-weight-bold\">This order has been marked as paid.</p>" +
+        statusElement.innerHTML =
+          '<div class="message-body">' +
+          '<p class="has-text-weight-bold">This order has been marked as paid.</p>' +
           "</div>";
-
       } else {
-
         statusElement.classList.add("is-danger");
-        statusElement.innerHTML = "<div class=\"message-body\">" +
+        statusElement.innerHTML =
+          '<div class="message-body">' +
           "<strong>This order has been marked as unpaid.</strong>" +
           "</div>";
       }
@@ -265,7 +288,9 @@ interface OrderItem_Acknowledge {
        * Items
        */
 
-      const itemsTbodyElement = document.querySelector(".order--items") as HTMLTableSectionElement;
+      const itemsTbodyElement = document.querySelector(
+        ".order--items",
+      ) as HTMLTableSectionElement;
 
       for (const item of order.items) {
         const trElement = buildItemRowElement(item);
@@ -276,29 +301,55 @@ interface OrderItem_Acknowledge {
        * Shipping Details
        */
 
-      (modalElement.querySelector(".order--shippingName") as HTMLDivElement).textContent = order.shippingName;
+      (
+        modalElement.querySelector(".order--shippingName") as HTMLDivElement
+      ).textContent = order.shippingName;
 
-      (modalElement.querySelector(".order--shippingAddress") as HTMLDivElement).innerHTML =
-        cityssm.escapeHTML(order.shippingAddress1) + "<br />" +
-        (order.shippingAddress2 ? cityssm.escapeHTML(order.shippingAddress2) + "<br />" : "") +
-        cityssm.escapeHTML(order.shippingCity) + ", " + cityssm.escapeHTML(order.shippingProvince) + "<br />" +
-        cityssm.escapeHTML(order.shippingPostalCode) + " &nbsp;" + cityssm.escapeHTML(order.shippingCountry || "");
+      (
+        modalElement.querySelector(".order--shippingAddress") as HTMLDivElement
+      ).innerHTML =
+        cityssm.escapeHTML(order.shippingAddress1) +
+        "<br />" +
+        (order.shippingAddress2
+          ? cityssm.escapeHTML(order.shippingAddress2) + "<br />"
+          : "") +
+        cityssm.escapeHTML(order.shippingCity) +
+        ", " +
+        cityssm.escapeHTML(order.shippingProvince) +
+        "<br />" +
+        cityssm.escapeHTML(order.shippingPostalCode) +
+        " &nbsp;" +
+        cityssm.escapeHTML(order.shippingCountry || "");
 
-      (modalElement.querySelector(".order--shippingEmailAddress") as HTMLDivElement).innerHTML =
-        "<a href=\"mailto:" + cityssm.escapeHTML(order.shippingEmailAddress) + "?subject=RE: " + cityssm.escapeHTML(order.orderNumber) + "\">" +
+      (
+        modalElement.querySelector(
+          ".order--shippingEmailAddress",
+        ) as HTMLDivElement
+      ).innerHTML =
+        '<a href="mailto:' +
+        cityssm.escapeHTML(order.shippingEmailAddress) +
+        "?subject=RE: " +
+        cityssm.escapeHTML(order.orderNumber) +
+        '">' +
         cityssm.escapeHTML(order.shippingEmailAddress) +
         "</a>";
 
-      (modalElement.querySelector(".order--shippingPhoneNumberDay") as HTMLDivElement).textContent =
-        order.shippingPhoneNumberDay;
+      (
+        modalElement.querySelector(
+          ".order--shippingPhoneNumberDay",
+        ) as HTMLDivElement
+      ).textContent = order.shippingPhoneNumberDay;
 
-      (modalElement.querySelector(".order--shippingPhoneNumberEvening") as HTMLDivElement).textContent =
-        order.shippingPhoneNumberEvening;
+      (
+        modalElement.querySelector(
+          ".order--shippingPhoneNumberEvening",
+        ) as HTMLDivElement
+      ).textContent = order.shippingPhoneNumberEvening;
     };
 
     cityssm.openHtmlModal("order-view", {
       onshow: onshowFunction,
-      onhidden: onhiddenFunction
+      onhidden: onhiddenFunction,
     });
   };
 
@@ -308,32 +359,35 @@ interface OrderItem_Acknowledge {
 
   let orders: Order[];
 
-  const resultContainerElement = document.querySelector("#container--results") as HTMLDivElement;
+  const resultContainerElement = document.querySelector(
+    "#container--results",
+  ) as HTMLDivElement;
 
   const buildItemPreviewBlockElement = (order: Order): HTMLDivElement => {
-
     const blockElement = document.createElement("div");
 
     const firstItem = order.items[0];
     const product = products[firstItem.productSKU];
 
     blockElement.innerHTML =
-      cityssm.escapeHTML(product
-        ? product.productName
-        : firstItem.productSKU) +
+      cityssm.escapeHTML(product ? product.productName : firstItem.productSKU) +
       (order.items.length > 1
-        ? " and " + (order.items.length - 1).toString() + " other" + (order.items.length > 2 ? "s" : "")
+        ? " and " +
+          (order.items.length - 1).toString() +
+          " other" +
+          (order.items.length > 2 ? "s" : "")
         : "") +
       "<br />";
 
     if (firstItem.fields.length > 0) {
-
       const itemDetailsElement = document.createElement("span");
       itemDetailsElement.className = "is-size-7";
 
-      itemDetailsElement.textContent = firstItem.fields.reduce((soFar, field) => {
-        return soFar + ", " + field.fieldValue;
-      }, "").slice(2);
+      itemDetailsElement.textContent = firstItem.fields
+        .reduce((soFar, field) => {
+          return soFar + ", " + field.fieldValue;
+        }, "")
+        .slice(2);
 
       blockElement.append(itemDetailsElement);
     }
@@ -341,8 +395,10 @@ interface OrderItem_Acknowledge {
     return blockElement;
   };
 
-  const buildOrderBlockElement = (order: Order, orderIndex: number): HTMLAnchorElement => {
-
+  const buildOrderBlockElement = (
+    order: Order,
+    orderIndex: number,
+  ): HTMLAnchorElement => {
     const blockElement = document.createElement("a");
     blockElement.className = "panel-block is-block";
     blockElement.href = "#" + order.orderID.toString();
@@ -354,48 +410,49 @@ interface OrderItem_Acknowledge {
     let orderTagHTML = "";
 
     if (order.orderIsRefunded) {
-      orderTagHTML = "<span class=\"tag is-warning\">" +
-        "Refunded" +
-        "</span>";
+      orderTagHTML = '<span class="tag is-warning">' + "Refunded" + "</span>";
     } else if (order.orderIsPaid) {
-      orderTagHTML = "<span class=\"tag is-success\">" +
-        "Paid" +
-        "</span>";
+      orderTagHTML = '<span class="tag is-success">' + "Paid" + "</span>";
     } else {
-      orderTagHTML = "<span class=\"tag is-danger\">" +
-        "Unpaid" +
-        "</span>";
+      orderTagHTML = '<span class="tag is-danger">' + "Unpaid" + "</span>";
     }
 
-    blockElement.innerHTML = "<div class=\"columns is-mobile is-multiline\">" +
-      ("<div class=\"column is-narrow is-vcentered\">" +
-        "<span class=\"icon m-2\">" +
+    blockElement.innerHTML =
+      '<div class="columns is-mobile is-multiline">' +
+      ('<div class="column is-narrow is-vcentered">' +
+        '<span class="icon m-2">' +
         (isOrderFullyAcknowledged(order)
-          ? "<i class=\"fas fa-3x fa-check-square is-success\" title=\"Acknowledged\"></i>"
-          : "<i class=\"far fa-3x fa-square\" title=\"Not Acknowledged\"></i>") +
+          ? '<i class="fas fa-3x fa-check-square is-success" title="Acknowledged"></i>'
+          : '<i class="far fa-3x fa-square" title="Not Acknowledged"></i>') +
         "</span>" +
         "</div>") +
-      ("<div class=\"column\">" +
-        "<strong>" + cityssm.escapeHTML(order.orderNumber) + "</strong><br />" +
-        cityssm.dateToString(orderTime) + " " +
-        cityssm.dateToTimeString(orderTime) + " " +
+      ('<div class="column">' +
+        "<strong>" +
+        cityssm.escapeHTML(order.orderNumber) +
+        "</strong><br />" +
+        cityssm.dateToString(orderTime) +
+        " " +
+        cityssm.dateToTimeString(orderTime) +
+        " " +
         "</div>") +
-      ("<div class=\"column result--itemPreview\"></div>") +
-      ("<div class=\"column is-full-mobile is-narrow has-text-right\">" +
+      '<div class="column result--itemPreview"></div>' +
+      ('<div class="column is-full-mobile is-narrow has-text-right">' +
         orderTagHTML +
         "</div>") +
       "</div>";
 
-    blockElement.querySelector(".result--itemPreview").append(buildItemPreviewBlockElement(order));
+    blockElement
+      ?.querySelector(".result--itemPreview")
+      ?.append(buildItemPreviewBlockElement(order));
 
     return blockElement;
   };
 
   const renderGetOrdersResult = () => {
-
     if (orders.length === 0) {
-      resultContainerElement.innerHTML = "<div class=\"message is-info\">" +
-        "<div class=\"message-body\">" +
+      resultContainerElement.innerHTML =
+        '<div class="message is-info">' +
+        '<div class="message-body">' +
         "There are no orders available that meet your search criteria." +
         "</div>" +
         "</div>";
@@ -411,40 +468,60 @@ interface OrderItem_Acknowledge {
       panelElement.append(panelBlockElement);
     }
 
-    cityssm.clearElement(resultContainerElement);
-    resultContainerElement.append(panelElement);
+    resultContainerElement.replaceChildren(panelElement);
   };
 
   /*
    * Send Query to Database
    */
 
-  const filterFormElement = document.querySelector("#form--filters") as HTMLFormElement;
+  const filterFormElement = document.querySelector(
+    "#form--filters",
+  ) as HTMLFormElement;
 
-  const getOrders = () => {
+  const getOrders = (showLoading: Event | boolean = true) => {
+    if (typeof showLoading === "object" || (typeof showLoading === "boolean" && showLoading)) {
+      cityssm.clearElement(resultContainerElement);
 
-    cityssm.clearElement(resultContainerElement);
+      resultContainerElement.innerHTML =
+        '<div class="has-text-centered p-4">' +
+        '<span class="icon">' +
+        '<i class="fas fa-4x fa-spinner fa-pulse" aria-hidden="true"></i>' +
+        "</span>" +
+        "</div>";
+    }
 
-    resultContainerElement.innerHTML = "<div class=\"has-text-centered p-4\">" +
-      "<span class=\"icon\">" +
-      "<i class=\"fas fa-4x fa-spinner fa-pulse\" aria-hidden=\"true\"></i>" +
-      "</span>" +
-      "</div>";
-
-    cityssm.postJSON("/orders/doGetOrders", filterFormElement, (resultJSON: { orders: Order[] }) => {
-      orders = resultJSON.orders;
-      renderGetOrdersResult();
-    });
+    cityssm.postJSON(
+      "/orders/doGetOrders",
+      filterFormElement,
+      (resultJSON: { orders: Order[] }) => {
+        orders = resultJSON.orders;
+        renderGetOrdersResult();
+      },
+    );
   };
+
+
 
   /*
    * Initialize Page
    */
 
-  getOrders();
+  getOrders(true);
 
-  document.querySelector("#filter--productSKU").addEventListener("change", getOrders);
-  document.querySelector("#filter--orderStatus").addEventListener("change", getOrders);
-  document.querySelector("#filter--acknowledgedStatus").addEventListener("change", getOrders);
-  document.querySelector("#filter--orderTimeMaxAgeDays").addEventListener("change", getOrders);
+  document
+    .querySelector<HTMLSelectElement>("#filter--productSKU")
+    ?.addEventListener("change", getOrders);
+
+  document
+    .querySelector<HTMLSelectElement>("#filter--orderStatus")
+    ?.addEventListener("change", getOrders);
+
+  document
+    .querySelector<HTMLSelectElement>("#filter--acknowledgedStatus")
+    ?.addEventListener("change", getOrders);
+
+  document
+    .querySelector<HTMLSelectElement>("#filter--orderTimeMaxAgeDays")
+    ?.addEventListener("change", getOrders);
 })();
